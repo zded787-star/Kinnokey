@@ -1,18 +1,17 @@
 -- ========================================================
--- KINGS HUB & PAVEL | GITHUB EDITION
+-- KINGS HUB & PAVEL | GITHUB EDITION (WATERMARK)
 -- ========================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
-local VirtualUser = game:GetService("VirtualUser")
 local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- ТВОЯ ССЫЛКА НА КЛЮЧИ С GITHUB
+-- ССЫЛКА НА ТВОИ КЛЮЧИ
 local KEY_SERVER_URL = "https://raw.githubusercontent.com/zded787-star/Kinnokey/refs/heads/main/keys.json"
 
 local keyDurations = {}
@@ -253,7 +252,6 @@ local function AddToggle(parent, text, callback)
     end)
 end
 
--- ФУНКЦИИ
 local states = { 
     ESP_Text = false, ESP_Box = false, ESP_Highlight = false, 
     Noclip = false, VIP_Hitbox = false, VIP_AutoShoot = false, 
@@ -335,6 +333,27 @@ end
 local function setupUI(isVIP, isSuper, msg)
     MainFrame.Visible = true
     AuthFrame.Visible = false
+    
+    -- ВОДЯНОЙ ЗНАК ДЛЯ БЕСПЛАТНОЙ ВЕРСИИ
+    if not isVIP then
+        local watermark = Instance.new("TextLabel", MainFrame)
+        watermark.BackgroundTransparency = 1
+        watermark.Size = UDim2.new(0, 220, 0, 20)
+        watermark.Font = Enum.Font.GothamSemibold
+        watermark.Text = "Было сделано каналом @K1ngss_rb"
+        watermark.TextColor3 = Color3.fromRGB(150, 150, 150)
+        watermark.TextSize = 12
+        watermark.ZIndex = 10
+        
+        local pos = math.random(1, 3)
+        if pos == 1 then
+            watermark.Position = UDim2.new(1, -230, 0, 50) -- Сверху справа
+        elseif pos == 2 then
+            watermark.Position = UDim2.new(1, -230, 1, -55) -- Снизу справа
+        else
+            watermark.Position = UDim2.new(0, 10, 1, -55) -- Снизу слева
+        end
+    end
     
     local espFrame = CreateTab("ESP", "ESP")
     local playerFrame = CreateTab("Player", "Игрок")
@@ -485,6 +504,8 @@ RunService.Heartbeat:Connect(function()
                 local dist = (p.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
                 if dist < 12 then
                     humanoid.Jump = true
+                    if dist < 12 then
+                    humanoid.Jump = true
                     break
                 end
             end
@@ -505,4 +526,77 @@ RunService.RenderStepped:Connect(function()
         local char = player.Character
         local head = char:FindFirstChild("Head")
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        local humanoid = char:
+        local humanoid = char:FindFirstChild("Humanoid")
+
+        if head and hrp and humanoid and humanoid.Health > 0 then
+            local role = getRole(player)
+            local color = RoleColors[role] or RoleColors.Unknown
+
+            local shouldExpand = false
+            if states.VIP_Hitbox then
+                if hitboxTarget == "Both" and (role == "Murderer" or role == "Sheriff") then shouldExpand = true
+                elseif hitboxTarget == "Murderer" and role == "Murderer" then shouldExpand = true
+                elseif hitboxTarget == "Sheriff" and role == "Sheriff" then shouldExpand = true end
+            end
+
+            if shouldExpand then 
+                head.Size = Vector3.new(4, 2, 2)
+                if states.ESP_Highlight and espHeadHighlights[player] then
+                    espHeadHighlights[player].Enabled = true
+                    espHeadHighlights[player].FillColor = color
+                    espHeadHighlights[player].OutlineColor = color
+                end
+            else
+                head.Size = Vector3.new(2, 1, 1)
+                if espHeadHighlights[player] then espHeadHighlights[player].Enabled = false end
+            end
+
+            if states.ESP_Text and tag then
+                tag.Enabled = true
+                local txt = tag:FindFirstChildOfClass("TextLabel")
+                if txt then
+                    txt.Text = player.Name .. "\n[" .. role .. "]"
+                    txt.TextColor3 = color
+                end
+            elseif tag then tag.Enabled = false end
+
+            local h = espHighlights[player]
+            if states.ESP_Highlight and h then
+                h.Enabled = true
+                h.FillColor = color
+                h.OutlineColor = color
+            elseif h then h.Enabled = false end
+
+            if states.ESP_Box and hasDrawing and espDrawings[player] then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                local headPos = Camera:WorldToViewportPoint(head.Position)
+                local box = espDrawings[player]
+                if onScreen then
+                    local height = math.abs(headPos.Y - screenPos.Y) * 2.5
+                    local width = height * 0.6
+                    box.Size = Vector2.new(width, height)
+                    box.Position = Vector2.new(screenPos.X - width / 2, screenPos.Y - height / 2)
+                    box.Color = color
+                    box.Visible = true
+                else box.Visible = false end
+            elseif hasDrawing and espDrawings[player] then
+                espDrawings[player].Visible = false
+            end
+        else 
+            if tag then tag.Enabled = false end
+            if espHighlights[player] then espHighlights[player].Enabled = false end
+            if espHeadHighlights[player] then espHeadHighlights[player].Enabled = false end
+            if espDrawings[player] and hasDrawing then espDrawings[player].Visible = false end
+        end
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if states.Noclip then
+        local char = LocalPlayer.Character
+        if char then for _, part in ipairs(char:GetDescendants()) do if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end end end
+    end
+end)
+
+print("[KINGS HUB] Скрипт успешно загружен и запущен.")
+-- КОНЕЦ СКРИПТА
