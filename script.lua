@@ -347,11 +347,11 @@ local function setupUI(isVIP, isSuper, msg)
         
         local pos = math.random(1, 3)
         if pos == 1 then
-            watermark.Position = UDim2.new(1, -230, 0, 50) -- Сверху справа
+            watermark.Position = UDim2.new(1, -230, 0, 50)
         elseif pos == 2 then
-            watermark.Position = UDim2.new(1, -230, 1, -55) -- Снизу справа
+            watermark.Position = UDim2.new(1, -230, 1, -55)
         else
-            watermark.Position = UDim2.new(0, 10, 1, -55) -- Снизу слева
+            watermark.Position = UDim2.new(0, 10, 1, -55)
         end
     end
     
@@ -504,14 +504,11 @@ RunService.Heartbeat:Connect(function()
                 local dist = (p.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
                 if dist < 12 then
                     humanoid.Jump = true
-                    if dist < 12 then
-                    humanoid.Jump = true
                     break
                 end
             end
         end
     end
-end)
 
 RunService.RenderStepped:Connect(function()
     for player, tag in pairs(espTags) do
